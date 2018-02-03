@@ -1,3 +1,25 @@
 # SEPP
 
-Paper of self-excited point process models of crime, and code.
+Self-excited point process models of crime:
+
+- Academic paper explaining the background mathematics, the EM algorithm and variations which have appeared in the literature, and giving trial results on Chicago crime data.
+- Python library, built on top of
+[`open_cp`](https://github.com/QuantCrimAtLeeds/PredictCode), implementing a large selection of SEPP models and fitting algorithms.
+- Jupyter notebooks demoing the models on Chicago crime data.
+
+
+## Install
+
+Clone / download the repository and:
+
+    python setup.py install
+
+Or install directly from GitHub:
+
+    pip install https://github.com/MatthewDaws/SEPP/zipball/master
+
+
+## Quick start guide
+
+There is a [quick start guide](quick_start) guide if you are interesting in quickly writing some notebook code to perform analysis on your own data.
+

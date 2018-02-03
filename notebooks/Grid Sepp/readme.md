@@ -4,6 +4,7 @@ Models which assume independent triggering in each grid cell.
 
 ### General notebooks
 
+- [Example of grided model](Example%20of%20grided%20model.ipynb) : Run the model on artificial data and see how the quality of MLE fitting varies.
 - [Explore timeseries of data](Explore%20timeseries%20of%20data.ipynb) : Look at how the events are distributed in time.
 - [Likelihood](Likelihood.ipynb) : A very quick look at how the likelihood varies with parameters.
 - [Making predictions](Making%20predictions.ipynb) : A very initial look at making predictions.
@@ -21,3 +22,6 @@ We consistently use data from Chicago, North Side.
 - [With real data KDE](With%20real%20data%20KDE.ipynb) : Fit the model `grid_nonparam.KDETrainer`
 
 
+### Models with modified data
+
+Same again, but with adjusted data from `opencrimedata`.
