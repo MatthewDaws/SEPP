@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/MatthewDaws/SEPP.svg?branch=master)](https://travis-ci.org/MatthewDaws/SEPP) 
+
 # SEPP
 
 Self-excited point process models of crime:
