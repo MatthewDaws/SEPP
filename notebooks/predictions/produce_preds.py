@@ -9,10 +9,11 @@ import sepp.predictors as predictors
 import sepp.grid_nonparam
 import sepp.sepp_grid_space
 import sepp.sepp_fixed
+import sepp.kernels
 
 datadir = os.path.join("..", "..", "..", "..", "..", "Data")
 #datadir = os.path.join("/media", "disk", "Data")
-side = "South"
+side = "North"
 
 def load_points():
     """Load Chicago data for 2016"""
@@ -32,8 +33,6 @@ def load_geometry():
     """Load the geometry for Chicago; we'll use Southside, as ever..."""
     open_cp.sources.chicago.set_data_directory(datadir)
     return open_cp.sources.chicago.get_side(side)
-
-# Takes about ??? hours
 
 with scripted.Data(load_points, load_geometry,
         start=datetime.datetime(2016,1,1)) as state:
@@ -82,17 +81,17 @@ with scripted.Data(load_points, load_geometry,
 
     for t in [0.5, 1, 1.5]:
         for s in [5, 10, 20]:
-            tkp = sepp.sepp_grid_space.FixedBandwidthTimeKernelProvider(t)
-            skp = sepp.sepp_grid_space.FixedBandwidthSpaceKernelProvider(s)
+            tkp = sepp.kernels.FixedBandwidthKernelProvider(t)
+            skp = sepp.kernels.FixedBandwidthKernelProvider(s)
             provider = predictors.GridSpaceKDEProvider(state.grid, state.timed_points,
                 tkp, skp, time_range.first)
             state.add_prediction_range(provider, time_range)
 
     for tkb in [0.1, 0.5, 1]:
         for skb in [10, 20, 50]:
-            tk = sepp.sepp_full.FixedBandwidthKernelProvider(tkb)
-            sk = sepp.sepp_full.FixedBandwidthKernelProvider(skb)
-            bk = sepp.sepp_full.FixedBandwidthKernelProvider(50)
+            tk = sepp.kernels.FixedBandwidthKernelProvider(tkb)
+            sk = sepp.kernels.FixedBandwidthKernelProvider(skb)
+            bk = sepp.kernels.FixedBandwidthKernelProvider(50)
             provider = predictors.FullKDEProvider(state.grid, state.timed_points,
                 tk, sk, bk, cutoff=time_range.first)
             state.add_prediction_range(provider, time_range)
@@ -109,10 +108,10 @@ with scripted.Data(load_points, load_geometry,
         for sigma in [20, 50, 100]:
             tk = sepp.sepp_fixed.ExpTimeKernel(omega)
             sk = sepp.sepp_fixed.GaussianSpaceKernel(sigma)
-            bk = sepp.sepp_full.FixedBandwidthKernelProvider(50)
+            bk = sepp.kernels.FixedBandwidthKernelProvider(50)
             provider = predictors.KDEFixedTriggerProvider(state.timed_points,
                 tk, sk, bk, cutoff=time_range.first)
             state.add_prediction_range(provider, time_range)
 
     state.score(scripted.HitCountEvaluator)
-    state.process(scripted.HitCountSave("{}.csv".format(side)))
+    state.process(scripted.HitCountSave("{}_all.csv".format(side)))

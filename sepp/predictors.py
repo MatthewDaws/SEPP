@@ -285,10 +285,8 @@ class GridSpaceKDEProvider():
       for predictions).
     :param points: The _training_ points, :class:`open_cp.data.TimedPoints`
       instances.
-    :param time_kernel_provider: Instance of
-      :class:`sepp_grid_space.TimeKernelProvider`
-    :param space_kernel_provider: Instance of
-      :class:`sepp_grid_space.SpaceKernelProvider`
+    :param time_kernel_provider: Instance of :class:`kernels.KernelProvider`
+    :param space_kernel_provider: Instance of :class:`kernels.KernelProvider`
     :param cutoff: End time for training.
     :param iterations: Number of iterations to perform.
     """
@@ -341,12 +339,10 @@ class FullKDEProvider():
       forming predictions faster).
     :param points: The _training_ points, :class:`open_cp.data.TimedPoints`
       instances.
-    :param time_kernel_provider: Instance of :class:`sepp_full.KernelProvider`
-      to use for the time component of the trigger.
-    :param space_kernel_provider: Instance of :class:`sepp_full.KernelProvider`
-      to use for the space component of the trigger.
+    :param time_kernel_provider: Instance of :class:`kernels.KernelProvider`
+    :param space_kernel_provider: Instance of :class:`kernels.KernelProvider`
     :param background_kernel_provider: Instance of
-      :class:`sepp_full.KernelProvider` to use for the background rate.
+      :class:`kernels.KernelProvider`
     :param cutoff: End time for training.
     :param iterations: Number of iterations to perform.
     """
