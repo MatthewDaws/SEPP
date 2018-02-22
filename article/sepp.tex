@@ -93,7 +93,7 @@ these insights.
 
 \subsection{Acknowledgements}
 
-This work was funded by the UK Home Office Police Innovation Fund, through the
+This work was partly funded by the UK Home Office Police Innovation Fund, through the
 project ``More with Less: Authentic Implementation of Evidence-Based Predictive
 Patrol Plans''.  The author wishes to thank Gabriel Rosser, Kristian Lum, William Issac,
 and Martin Short for useful electronic correspondance.
@@ -391,7 +391,7 @@ kernel at its location, and the total intensity of the trigger, which is $\theta
 the expected number of new events the trigger will give rise to.  As each of these events
 will give rise to further triggers, the total number of expected events, in total, which one
 event will subsequently trigger is
-\[ \mu + \mu^2 + \mu^3 + \cdots = \frac{\mu}{1-\mu}. \]
+\[ \theta + \theta^2 + \theta^3 + \cdots = \frac{\theta}{1-\theta}. \]
 See Appendix~\ref{app:gen_func} for a rigorous argument.  For example, with $\theta=2.13
 \times 10^{-2}$ found above, we expect each event to trigger $2.18\times 10^{-2}$ further
 events (that is, essentially none!)
@@ -432,7 +432,9 @@ sensitivity to exactly how we bin the timestamps (the length of the bins, and th
 from which bins start).  Again, we often see that when $\omega^{-1}$ becomes large,
 $\theta$ is estimated as being vanishly small, suggesting almost no triggering effect.
 It is possible to ``tune'' the binning, on some datasets, but this begs the question of
-how we implement a \emph{robust} method.
+how we implement a \emph{robust} method.  Much the same behaviour is seen with the second
+dataset, which is perhaps not surprising, as we have not altered the timestamps, only the
+spatial locations.
 
 From looking at the input data, we do not notice anything in particular which would
 obviously cause such a dependence on the offset of binning.  The number of events per day
@@ -440,7 +442,7 @@ is distributed much as a Poisson random variable, and the number of events per w
 is fairly constant across the working week, and a little lower at the weekend.  The
 only slight surprise is shown in Figure~\ref{fig:by_hour_of_day}, where we see that
 for the North side of Chicago, there
-are an unexpected large number of Burglary events timestamped to between 8am and 9am.
+are an unexpectedly large number of Burglary events timestamped to between 8am and 9am.
 Otherwise the number of events is fairly constant across the day, with a slight dip
 from 3am to 7am.  We do not know if, perhaps, people awake up and discover an overnight
 burglary; or if events are logged at this time but actually happen early, perhaps due
@@ -576,7 +578,7 @@ longer tail than the real distribution, and being very noisy for smaller bandwid
 \section{Allowing spatial interaction}\label{sec:grid_interact}
 
 To move beyond this class of grid based model, we shall keep the grid ``histogram'' based
-estimator of the background risk, but will consider the posibility of events from one grid
+estimator of the background risk, but will consider the possibility of events from one grid
 cell triggering events in another cell.  We will work with a very general triggering kernel,
 but will assume that there is no link between space and time.  Thus the intensity is
 \[ \lambda^*(t,x,y) = \mu_k + \sum_{t_i<t} \theta f(t-t_i) g(x-x_i, y-y_i), \]
@@ -627,7 +629,9 @@ experiment with $r_0=5m$ we estimate $\alpha\approx 8.19\times 10^{-3}, \sigma \
 and $\theta\approx 0.278$.  Thus there is certainly repeat-like behaviour, but it is very
 tightly grouped in space (almost all the probability of the trigger kernel is within
 20m of the triggering event, which seems unrealistically small).  The estimated value of
-$\omega$ is now small, with $1/\omega \approx 153$ days!
+$\omega$ is now small, with $1/\omega \approx 153$ days!  With the second dataset, we obtain
+a smaller value of $\sigma$, a somewhat smaller $\theta \approx 6.67\times 10^{-2}$ and
+now $1/\omega\approx 254$ days.  Needless to say, this is an unreasonably long decay time!
 
 
 
@@ -735,9 +739,9 @@ and then applying the previous idea.
 
 We implement an adaptive, data-driven approach which combines these ideas.  For each column
 of the $p$-matrix, we list the entries in decreasing order, and form the cumulative sum.  Any
-entry which is beyond a cutoff (we use 99.9\%) we set to 0.  We then form the KDEs, but use the
-input data to estimate the support.  This gives an automatic algorithm which leads to considerable
-speedup.  However, the resulting algorithm is still very slow (e.g. on large simulated datasets).
+entry which is beyond a cutoff (we use 99.9\%) we set to 0.  This gives an automatic algorithm
+which leads to considerable speedup.  However, the resulting algorithm is still very slow
+(e.g. on large simulated datasets).
 On the Chicago dataset it is slow, but acceptable; the first issue above appears to be the
 critical one as far as speed is concerned.
 
@@ -768,7 +772,8 @@ in the simulation.  Both the full EM algorithm and the stochastic variant perfor
 
 We observe some very interesting behaviour from real data.  Figure~\ref{fig:grid_kde_1} shows
 an initial result, with $f$ estimated with a bandwidth of 1 day, and $g$ estimated with a bandwidth
-of 10 metres.  We obtain $\theta=0.34$.  The vertical lines in the plot of $f$ indicate each day;
+of 10 metres.  We obtain $\theta\approx 0.34$.  The vertical lines in the plot of $f$ indicate
+each day;
 for example, we see a peak somewhere between 21 and 22~days.
 The estimate for $g$ involves very small numbers, so to better visualise, we have shown the
 surface for $\log(e^{-20}+g)$.
@@ -780,7 +785,7 @@ a sample of which events are background, and which are triggered.  Figure~\ref{f
 shows the result: we plot both the trigger ``delta'' (the vector $(t_j-t_i, x_j-x_i, y_j-y_i)$)
 and a (plug-in bandwidth) KDE, using the same visualisation strategy of plotting $\log(\epsilon+k)$
 for some small $\epsilon$, to visualise the density.  In both the plot of $g$, and the sample,
-we see a clear grid like pattern.  This is a reflection of the north/south and east/west grid
+we see a clear grid-like pattern.  This is a reflection of the north/south and east/west grid
 layout of streets in Chicago, together we the observed ``clustering'' from
 Figure~\ref{fig:chicago_overview}.  That we see such a pronounced grid pattern should not surprise
 us, given the geography of Chicago, but whether the artifical clustering in the input data
@@ -788,7 +793,7 @@ exaggerates this is unknown.
 
 We note that if we continue to run the EM algorithm for further iterations (which is time
 consuming!) then the shape of the triggers does not qualitatively change, but $\theta$ (the
-overall trigger risk) does tend to increase; after 200 iterations we have $\theta=0.44$.
+overall trigger risk) does tend to increase; after 100 iterations we have $\theta\approx 0.41$.
 
 With the second dataset, Figure~\ref{fig:grid_kde_1_mod},
 we get a smaller value for $\theta$, namely $0.17$, and a rather different
@@ -797,8 +802,8 @@ trigger does look similar, suggesting the ``grid'' pattern we observe here is du
 of Chicago, and not just the artificial clustering in the initial input data.
 A plot of the estimated trigger points, not shown, is similar to Figure~\ref{fig:grid_kde_1a}
 but shows less ``clumpy-ness'' in space.  If we run the EM algorithm for further iterations,
-then again $\theta$ increases (to $0.26$ after 200 iterations) and the time trigger develops a
-noticeable bump at 4 days.
+then again $\theta$ increases (to $0.20$ after 100 iterations) and the time trigger develops a
+slight bump at 4 days.
 
 \begin{figure*}
   \includegraphics[width=\textwidth]{../notebooks/grid_kde_one.pdf}
@@ -823,7 +828,7 @@ noticeable bump at 4 days.
 
 We fitted the same model using the stochastic EM algorithm, and obtained quite different results,
 see Figure~\ref{fig:grid_kde_2} (the sample of trigger points plot is similarly different).
-The estimated value of $\theta$ is $0.16$, about half that we saw before.  The time kernel is
+The estimated value of $\theta$ is $0.12$, about half that we saw before.  The time kernel is
 similar is shape, but with different quantitative properties.  The space kernel is also similar
 in shape, but with a much smaller support, and is much less symmetric.
 We believe that these differences are caused by
@@ -831,7 +836,7 @@ exactly the problem we identified above, namely that by sampling, we assign for 
 each point is either background or triggered, instead of allowing a mixture.  Taking the full
 expectation allows us to take account of the probability that an event is triggered, and hence
 allow that event to contribute some weight to the KDE.  The second dataset exhibits
-similar behaviour: again $\theta$ is smaller, at $0.053$, the time trigger is similar, but
+similar behaviour: again $\theta$ is smaller, at $0.052$, the time trigger is similar, but
 the space trigger is much more localised in space.
 
 \begin{figure*}
@@ -859,10 +864,10 @@ The authors of \cite{sepp} and \cite{zovj} suggest using a variable bandwidth KD
 bandwidth for each point chosen by the distance to the $k$th nearest neighbour; \cite{sepp}
 uses a value of $k=15$.  We use the same idea for the space kernel $g$, keeping the time
 kernel as being a fixed bandwidth of 1 day.  The results are shown in Figure~\ref{fig:grid_kde_4};
-here $\theta = 0.38$.  Of note is the very long fall-off in time, and the large support for the 
-space kernel $g$.  We artificially forced the support of $g$ to be within a disk of radius 1500m,
-to speed up the algorithm (which is still extremely slow).  Notice that the support of $g$
-really does extend to the edge of this disk, and that it has a strong pattern.  The sampled
+here $\theta \approx 0.38$.  Of note is the very long fall-off in time, and the large support for
+the space kernel $g$.  We artificially forced the support of $g$ to be within a disk of radius
+1500m, to speed up the algorithm (which is still extremely slow).  Notice that the support of
+$g$ really does extend to the edge of this disk, and that it has a strong pattern.  The sampled
 trigger points, Figure~\ref{fig:grid_kde_4a}, similarly shows a very strong pattern; notice
 that the spatial extent is somewhat larger than that seen in Figure~\ref{fig:grid_kde_1a},
 though the pattern is rather similar.
@@ -885,7 +890,7 @@ though the pattern is rather similar.
 
 Again such behaviour seems hugely dependent on the chosen bandwidth.  By varying the
 value of $k$, or the fixed bandwidth used for $f$, we observe a large range of different behaviours
-and, especially, a large range in the value of $\theta$.
+and, especially, a large range in the value of $\theta$.  For the second dataset, [TO DO: Re-run and save...]
 
 Furthermore, and of particular interest given the algorithm used in \cite{sepp}, we ran the same
 model as lead to Figure~\ref{fig:grid_kde_4}, but using the stochastic EM algorithm.  The speed of
@@ -967,7 +972,7 @@ The final step towards the model used in \cite{sepp2} is to stop using a grid to
 the background rate.  So our general model will be
 \[ \lambda^*(t,x,y) = \mu(t,x,y) + \sum_{t_i < t} \mu_1(t-t_i, x-x_i, y-y_i). \]
 In \cite{sepp2} $\mu$ is set to to $f(t)g(x,y)$ and $f,g$ are estimated via KDE methods.
-A problem here, as explained before, is that KDE methods are suseptible to ``edge-effect'',
+A problem here, as explained before, is that KDE methods are susceptible to ``edge-effect'',
 which will in particular badly effect $f$ near the start and end of the time period we are
 interested in.  As our ultimate aim is prediction, we actually need to project $f$ forwards
 (a little) in time.  There are no details in \cite{sepp2} as to how prediction was actually
@@ -986,7 +991,13 @@ exception that the time trigger is rather underestimated near $0$ (judging from 
 \cite{sepp} and \cite{rc} those authors encountered the same issue).  
 
 We used the same space/time KDE method as in Section~\ref{sec:joint_grid}, and for the background
-used a KDE with a fixed bandwidth of 100m.  The result is shown in Figure~\ref{fig:no_grid_kde_1}.
+used a KDE with a fixed bandwidth of 100m.  The results are shown in Figure~\ref{fig:no_grid_kde_1}
+and Figure~\ref{fig:no_grid_kde_1a}.  Here we estimate $\theta\approx 0.58$.  These results
+come from 20 iterations of the EM algorithm; unfortunately, with another 30 iterations,
+we find that $\theta$ decays, and the trigger kernel becomes more concentrated.
+Here the results of using the stochastic EM algorithm are nothing like as extreme as
+seen in Figure~\ref{fig:grid_kde_5}, being rather similar to the results of the full EM
+algorithm after 50 iterations.
 
 \begin{figure*}
   \includegraphics[width=\textwidth]{../notebooks/no_grid_kde_1.pdf}
@@ -996,10 +1007,15 @@ Figure~\ref{fig:full_kde_1}, and with a bandwidth of 100m for the background.}
   \label{fig:no_grid_kde_1}
 \end{figure*}
 
-[ETC.]
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/no_grid_kde_1.pdf}
+  \caption{Sampled trigger points from the fitted model displayed in
+Figure~\ref{fig:no_grid_kde_1}.}
+  \label{fig:no_grid_kde_1a}
+\end{figure*}
 
 
-We now also look at
+We now look at
 \[ \lambda^*(t,x,y) = \mu f(x,y) + \theta \sum_{t_i < t} g_1(t-t_i) g_2(x-x_i, y-y_i), \]
 that is, assume that the trigger factors in space and time.  We have two motivations for this:
 speed (as the full three dimensional KDE method is slow to fit, and slow to make predictions
@@ -2025,10 +2041,10 @@ temporal events'', International Journal of Geographical Information Science, 14
 \vspace{5ex}
 
 \noindent\emph{Author's Address:}
-\parbox[t]{3in}{School of Geography\\
-University of Leeds\\
-Leeds\\
-LS2 9JT}
+\parbox[t]{3in}{Jeremiah Horrocks Institute\\
+University of Central Lancashire\\
+Preston\\
+PR1 2HE}
 
 \bigskip\noindent\emph{Email:} \texttt{matt.daws@cantab.net}
 
