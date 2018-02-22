@@ -1,0 +1,10 @@
+# Only for testing
+pytest
+codecov
+pytest-cov
+
+
+# Used by the library
+#geopandas
+#scipy
+#rtree
