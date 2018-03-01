@@ -890,7 +890,17 @@ though the pattern is rather similar.
 
 Again such behaviour seems hugely dependent on the chosen bandwidth.  By varying the
 value of $k$, or the fixed bandwidth used for $f$, we observe a large range of different behaviours
-and, especially, a large range in the value of $\theta$.  For the second dataset, [TO DO: Re-run and save...]
+and, especially, a large range in the value of $\theta$.  For the second dataset,
+Figure~\ref{fig:grid_kde_mod_4}, again shows very different behaviour, again being much
+closer to Figure~\ref{fig:grid_kde_1_mod}.  The sampled trigger points, not shown, shows
+that relatively few events are identified as being triggered; indeed, with $\theta \approx
+0.04$, this is to be expected.
+
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/grid_kde_knn1_mod.pdf}
+  \caption{As Figure~\ref{fig:grid_kde_4} but for the second dataset.}
+  \label{fig:grid_kde_mod_4}
+\end{figure*}
 
 Furthermore, and of particular interest given the algorithm used in \cite{sepp}, we ran the same
 model as lead to Figure~\ref{fig:grid_kde_4}, but using the stochastic EM algorithm.  The speed of
@@ -958,10 +968,12 @@ increasing spatial concentration with time that we observed before.
   \label{fig:full_kde_3}
 \end{figure*}
 
-For the second dataset, the results are rather similar.  The fix of an exponential to the
-time kernel is even better, and the marginal space kernel looks very similar, but, again, with
-a less pronounced ``grid-like'' pattern.  The version of Figure~\ref{fig:full_kde_2} for the
-second dataset is also much the same.  
+For the second dataset, the results are rather similar.  The fit of an exponential to the
+time kernel is a little worse, and the marginal space kernel looks very similar, but, again, with
+a less pronounced ``grid-like'' pattern, and with a smaller spatial distribution.
+The version of Figure~\ref{fig:full_kde_2} for the second dataset is also much the same, but
+again with a smaller spatial distribution, and without the long ``tail'' from 15 to 30
+days seen in the right two plots of Figure~\ref{fig:full_kde_2}.
 
 
 
@@ -977,7 +989,7 @@ which will in particular badly effect $f$ near the start and end of the time per
 interested in.  As our ultimate aim is prediction, we actually need to project $f$ forwards
 (a little) in time.  There are no details in \cite{sepp2} as to how prediction was actually
 carried out.  We instead prefer to assume a constant background rate in time.
-A more sophisticated analysis, which we do not explore here, would probably use time-series
+A more sophisticated analysis, which we do not explore here, would perhaps use time-series
 techniques to identify periodic and overall trend levels in the background rate.
 
 So we work with
@@ -999,6 +1011,12 @@ Here the results of using the stochastic EM algorithm are nothing like as extrem
 seen in Figure~\ref{fig:grid_kde_5}, being rather similar to the results of the full EM
 algorithm after 50 iterations.
 
+As ever, by changing the bandwidths, we obtain different results.  However, by contrast
+with previous sections, the results using the second dataset are rather similar. The main
+difference is in the analogue of Figure~\ref{fig:no_grid_kde_1a} where, again, the sample
+space trigger pattern is less clustered, and the right hand plots only extend to around 18 days
+instead of closer to 30 days.
+
 \begin{figure*}
   \includegraphics[width=\textwidth]{../notebooks/no_grid_kde_1.pdf}
   \caption{For the model described in Section~\ref{sec:no_grid_kde}, showing the background
@@ -1008,12 +1026,52 @@ Figure~\ref{fig:full_kde_1}, and with a bandwidth of 100m for the background.}
 \end{figure*}
 
 \begin{figure*}
-  \includegraphics[width=\textwidth]{../notebooks/no_grid_kde_1.pdf}
+  \includegraphics[width=\textwidth]{../notebooks/no_grid_kde_1a.pdf}
   \caption{Sampled trigger points from the fitted model displayed in
 Figure~\ref{fig:no_grid_kde_1}.}
   \label{fig:no_grid_kde_1a}
 \end{figure*}
 
+Following \cite{sepp2} more closely, we also used a nearest neighbour KDE method.
+Figure~\ref{fig:no_grid_nnkde_1} shows the result, which is notably different to
+Figure~\ref{fig:no_grid_kde_1}, especially in the lack of a strong pattern is the
+marginal space trigger kernel.  Figure~\ref{fig:no_grid_nnkde_1a} shows the sampled
+trigger points, which again are much less extreme than that seen in
+Figure~\ref{fig:no_grid_kde_1a}.
+
+We again found that the stochastic EM algorithm did not work well.  With the default
+initial conditions we use, the algorithm tends to diverge quickly, predicting all events
+as being triggered.  We also tried the initial conditions suggested by \cite{rc}.  This leads
+to an initially more stable result, but after more iterations (say, 15) the fitting again
+diverges.
+
+The second dataset shows similar behaviour, with the only difference really being that the
+estimated marginal spatial kernels are less concentrated near the origin (and similarly
+in the sampled trigger plots) which we expect, given the artificial clustering seen in the
+first dataset.  In particular, the stochastic EM algorithm still diverges to estimate nearly
+every event as having been triggered.
+[\footnote{Just waiting for `With modified real data 2a` to finish running; don't expect
+it to show any differences...}]
+
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/no_grid_nnkde_1.pdf}
+  \caption{For the model described in Section~\ref{sec:no_grid_kde}, showing the background
+rate and the marginal time and space kernels, fitted with a nearest neighbour KDE method,
+with $k=15$.}
+  \label{fig:no_grid_nnkde_1}
+\end{figure*}
+
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/no_grid_nnkde_1a.pdf}
+  \caption{Sampled trigger points from the fitted model displayed in
+Figure~\ref{fig:no_grid_nnkde_1}.}
+  \label{fig:no_grid_nnkde_1a}
+\end{figure*}
+
+
+
+
+\subsection{With the trigger split in space and time}
 
 We now look at
 \[ \lambda^*(t,x,y) = \mu f(x,y) + \theta \sum_{t_i < t} g_1(t-t_i) g_2(x-x_i, y-y_i), \]
@@ -1022,11 +1080,48 @@ speed (as the full three dimensional KDE method is slow to fit, and slow to make
 from) and Figure~\ref{fig:full_kde_2} which showed unexpected (and somewhat counter-intuitive)
 changes in the space kernel through time.
 
+Figure~\ref{fig:no_grid_kde_split_1} shows the result, with the background fit with a KDE of
+fixed bandwidth 100m, the time component of the trigger with a bandwidth of 1 day, and the
+space component with a bandwidth of 20m.  Figure~\ref{fig:no_grid_kde_split_1a} shows the
+sampled triggers, which show less symmetry than Figure~\ref{fig:no_grid_kde_1a}, for example.
 
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/no_grid_kde_split_1.pdf}
+  \caption{As Figure~\ref{fig:no_grid_kde_1} but with the trigger kernel ``split''
+in space and time.  The background uses a KDE of bandwidth 100m, the time component of
+the trigger a bandwidth of 1 day, and the space component a bandwidth of 20m.}
+  \label{fig:no_grid_kde_split_1}
+\end{figure*}
 
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/no_grid_kde_split_1a.pdf}
+  \caption{Sampled trigger points from the fitted model displayed in
+Figure~\ref{fig:no_grid_kde_split_1}.}
+  \label{fig:no_grid_kde_split_1a}
+\end{figure*}
 
+Again, these results are rather dependent on the bandwidths chosen.  With a background
+KDE of 30m, and a space component KDE of 30m, we obtain a fitted model which has almost
+no repeat behaviour.  The stochastic EM algorithm, for the same settings as 
+Figure~\ref{fig:no_grid_kde_split_1} leads to a similar result, but with further iterations
+converges to a case where almost all events are estimated as having been triggered.
+The second dataset shows similar behaviour, though with a trigger kernel more tightly
+supported in time, and more widely supported in space.  The stochastic EM algorithm behaves
+in the same way, as does changing the bandwidths.
 
+Finally, we use a nearest neighbour estimator.  We initially experimented with
+using $k=30$ for time and space for the trigger estimator, and $k=20$ for the background.
+This was very slow to compute, and lead to a very noisy time trigger kernel.  The
+stochastic EM algorithm again diverged to predicting almost all triggered events.
 
+We then looked at $k=15$ for the spatial components, and $k=30$ for the time trigger estimator
+(so more closely following \cite{sepp2, rc}).  After 15 iterations of the EM algorithm,
+this lead to predicting almost all events as being triggered, and having a very noisy time
+trigger.  The stochastic EM algorithm is similar.  It is interesting to note that for the
+second dataset, for the stochastic EM algorithm, the time kernel for the trigger shows
+strong peaks at exactly 1 day and 2 days, and then at a little over 3 days, at about 5.5 days,
+and at 7 days.  However, given that almost all events end up estimated as triggered events,
+it is hard to suggest that this pattern really ``means'' anything.
 
 
 
