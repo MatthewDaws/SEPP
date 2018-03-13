@@ -98,6 +98,7 @@ def compute_space_marginal(ker):
         return kernels.ReflectedKernel(k, already_reflected_axis - 1)
     return k
 
+
 class FixedBandwidthKernelProvider(KernelProvider):
     """Use a fixed bandwidth Gaussian kernel.
 

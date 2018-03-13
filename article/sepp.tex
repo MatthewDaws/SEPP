@@ -469,7 +469,7 @@ of adjusting the $p$-matrix.  Henceforth, we shall allow exact repeats in time, 
 
 
 
-\section{Non-parametric grid based models}
+\section{Non-parametric grid based models}\label{sec:non_param_grid}
 
 Rather than assume a parametric form of the triggering kernel, we could instead take a more
 ``data driven'' approach, and use a non-parametric form for the triggering kernel.  We
@@ -862,7 +862,8 @@ the bandwidths, we obtain a rather wide range of behaviours.
 
 The authors of \cite{sepp} and \cite{zovj} suggest using a variable bandwidth KDE with the
 bandwidth for each point chosen by the distance to the $k$th nearest neighbour; \cite{sepp}
-uses a value of $k=15$.  We use the same idea for the space kernel $g$, keeping the time
+uses a value of $k=15$.  See Appendix~\ref{app:knn_details} for details.
+We use the same idea for the space kernel $g$, keeping the time
 kernel as being a fixed bandwidth of 1 day.  The results are shown in Figure~\ref{fig:grid_kde_4};
 here $\theta \approx 0.38$.  Of note is the very long fall-off in time, and the large support for
 the space kernel $g$.  We artificially forced the support of $g$ to be within a disk of radius
@@ -1050,8 +1051,6 @@ estimated marginal spatial kernels are less concentrated near the origin (and si
 in the sampled trigger plots) which we expect, given the artificial clustering seen in the
 first dataset.  In particular, the stochastic EM algorithm still diverges to estimate nearly
 every event as having been triggered.
-[\footnote{Just waiting for `With modified real data 2a` to finish running; don't expect
-it to show any differences...}]
 
 \begin{figure*}
   \includegraphics[width=\textwidth]{../notebooks/no_grid_nnkde_1.pdf}
@@ -1123,6 +1122,65 @@ strong peaks at exactly 1 day and 2 days, and then at a little over 3 days, at a
 and at 7 days.  However, given that almost all events end up estimated as triggered events,
 it is hard to suggest that this pattern really ``means'' anything.
 
+
+
+\section{Fixed kernels}\label{sec:fixed}
+
+At the other extreme from using a KDE method to ``choose'' a trigger kernel is to actually
+fix a trigger kernel.  That is, we consider an intensity function of the form
+\[ \lambda^*(t,x,y) = \mu f(x,y) + \theta \sum_{t_i < t} g(t-t_i, x-x_i, y-y_i), \]
+where now $g$ is chosen and fixed, and we seek to fit $\theta, \mu$ and $f$ to the data.
+
+We implement models where $f$ is given by a grid-based histogram (that is, exactly as in
+Sections~\ref{sec:gbm}, \ref{sec:non_param_grid} and the first part of \ref{sec:grid_interact})
+and is given by a KDE method (as in Section~\ref{sec:no_grid_kde}).  Notice that the EM
+algorithm copes with such models seamlessly: we simply have no parameters to estimate for $g$.
+Note also that even for, say, a grid based $f$, there is no closed-form which gives the maximum
+likelihood estimate for $f, \mu$ and $\theta$.
+
+Yet again, we check that our algorithm fits well to synthetic data.  For real data, we again
+split $g$ into a time component, which is exponential decay, and a space kernel, which is
+Gaussian, namely
+\[ g(t,x,y) = \omega e^{-\omega t} \frac{1}{2\pi\sigma^2}
+\exp\Big( \frac{-(x^2+y^2)}{2\sigma^2} \Big). \]
+We choose and fix $\omega, \sigma^2$ before fitting.
+
+We can compare this model to the classical ``prospective hotspotting'' technique,
+\cite{bjp}.  Following the more modern approach in, for example, \cite{rdbjc},
+we estimate the risk intensity at a point $(t,x,y)$ as
+\[ \sum_{t_i<t} g_1(\|(x,y) - (x_i,y_i)\|) g_2(t-t_i), \]
+where $g_1$ and $g_2$ are kernels on $[0,\infty)$.  (We could also, in principle, consider
+spatial kernels which had no radially symmetric).  \cite{rdbjc} uses a linear decay
+for $g_1$ and exponential decay for $g_2$, while the original \cite{bjp} uses an explicitly
+grid-based variant of this idea to compute $g_1$.
+
+For our purposes, we note that this is exactly the same as our model, if $f=0$ (we may ignore
+$\theta$ as it is now just a normalisation factor).  That is, our model can be thought of
+as prospective hotspotting with the addition of a background rate which is derived from the data.
+
+When the background rate $f$ is estimated from a grid, we have just two parameters to fix,
+$\sigma^2$ and $\omega$.  Figure~\ref{fig:fixed1} shows how $\theta$ varies with $\sigma$
+and $\omega^{-1}$.  We notice that to obtain noticeable repeat behaviour, we need to choose
+a very small spatial bandwidth ($\sigma=10$ or so) and a long decay in time (100 days or so).
+Figure~\ref{fig:fixed1mod} shows the same for the second dataset.  We see that the value of
+$\theta$ is somewhat smaller, but that the maximum value occurs for the somewhat more
+realistic values of $\sigma=100m$ and an $\omega^{-1}$ on the order of days.  That is,
+some of the repeat behaviour seems to be due to the artificially clustered nature of
+the first dataset.
+
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/fixed_grid_1.pdf}
+  \caption{Results of fitting the model from Section~\ref{sec:fixed} with a grid-based
+  background.  In each plot, the vertical axis shows $\theta$, the horizontal axis shows
+  $\omega^{-1}$ the expectation of the time decay.  We plot for varying values of $\sigma$.}
+  \label{fig:fixed1}
+\end{figure*}
+
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/fixed_grid_mod_1.pdf}
+  \caption{As Figure~\ref{fig:fixed1} but for the second dataset.}
+  \label{fig:fixed1mod}
+\end{figure*}
 
 
 
@@ -1221,14 +1279,107 @@ If we instead use $\lambda^*$ directly, for example integrating it over both the
 each grid cell, then we obtain expected counts $(n_k)$ say, and the maximum likelihood estimation
 is now $\hat p_k = n_k / \sum_k n_k$.
 
-\section{Prediction results}
 
-TODO: I guess compare lots of model, via Hit rate maybe, and see if there is much difference?
 
-Would also be interesting to fix the trigger kernel (e.g. using Prohotspot etc.) and use
-the EM algorithm to predict the background, and then make predictions.
+\section{Prediction results}\label{sec:actual_preds}
 
-TODO: Making a prediction from a KDE method is very slow. (Very slow!)  Can we discretise the trigger kernel, and use that instead to make the prediction?  Is that faster?  Is it as good?
+We used the \texttt{open\_cp.scripted} Python module, which allows us to produce predictions,
+and to ``score'' them, in an automated way, using a simple Python script.  We adapted the
+major classes of models discussed in previous sections to give predictions, following the
+paradigm above.  To be precise, we fit the model using the EM algorithm, and then produce
+grid based predictions:
+\begin{itemize}
+\item for purely grid based models, we need to integrate over the time kernel for each
+grid cell.  We approximate this by sampling at 100, equally spaced, places over the time
+range which interests us (the next day, in this case);
+\item for more general models, we sample at 20 equally space place over time, and at 20 randomly
+chosen places in space.  For speed, we only support trigger kernels which factor into a space
+component and a time component.
+\item finally, for the KDE based models, we further speed things up by converting the
+kernels into histograms, for the purposes of prediction.  We typically use a bandwidth of
+$1/10$ days and 10m, for time and space, respectively.  From numerical experiments on our data,
+replacing continuous kernels with histograms in this way leads to a huge increase in speed
+at very little in accuracy for the final prediction.
+\end{itemize}
+
+We use the first dataset of Chicago data, for the year 2016.  We make a prediction for each
+day in October, November and December, using all the data before midnight on that day to
+inform the prediction, and ``scoring'' the prediction against the reality of which events
+occurred the next day.  For fitting the models, we use the data from January through
+September 2016 inclusive.  
+
+To ``score'' a prediction, we use the usual procedure
+(see \cite{arc} or \cite[Section~5]{sepp} for example)
+ of fitting a ``coverage level'' (say, 10\%) and select that fraction
+of grid cells, using the prediction to rank the cells from most risky to least risky.
+We then compare the number of crime events on the next day with the number if events we
+have ``captured'': events which have fallen in the selected grid cells.  This is termed the
+``hit-rate'' in the literature.  Following our suggestion in \cite{daws2}, we use a simple
+Bayesian approach, fitting a Binomial to the hit rates, with parameter $p$, the probability
+of capturing the event, with a Beta distribution prior on $p$.  We then plot the median value of
+$p$ from the posterior, together with a Bayesian confidence interval of $\pm 34$\%.
+
+By way of comparison, we also use the ``Naive Provider'' prediction method from
+\texttt{open\_cp}.  This can be thought of as a grid-based SEPP model with \emph{zero}
+trigger intensity.  That is, for each grid cell independently, we estimate the risk as simply
+being the proportion events before the current day which have occurred in that grid cell.
+We would certainly hope that a ``good'' prediction method, perhaps taking account of spatial
+interactions, and/or repeat behaviour, would out-perform this method.
+
+For those models which are parameters, we fit the models with a variety of parameters.  
+We then pick the ``best'' parameter(s) to use by looking at the hit-rate over coverage levels
+up to 20\% (we use smaller coverage levels, as these seem more realistic, from the perspective
+of supposing that selected grid cells will somehow receive extra police attention, for example).
+
+\begin{figure*}
+  \includegraphics[width=\textwidth]{../notebooks/all_north_preds.pdf}
+  \caption{For a variety of models giving rise to predictions as described in
+  Section~\ref{sec:actual_preds}, we select the best parameters, and here show the hit rate.}
+  \label{fig:north_preds}
+\end{figure*}
+
+Figure~\ref{fig:north_preds} shows the result.  We notice that all the methods perform
+similarly, with the expected variation between different days for any given model certainly
+being comparable to the difference between different models.  To compare better the different
+models, we compare the hit-rate against that given by the ``Naive Provider'', as shown in
+Figure~\ref{fig:north_preds_normed}.  For the North side of Chicago, the model with the best
+average increase over the Naive Provider is the \texttt{GridSpaceExpDecayProvider}
+which is the first model considered in Section~\ref{sec:grid_interact}.  The other models in
+Section~\ref{sec:grid_interact} also perform well.
+
+\begin{figure*}
+  \includegraphics[width=3.3in]{../notebooks/all_north_preds_normed.pdf}
+  \includegraphics[width=3.3in]{../notebooks/all_south_preds_normed.pdf}
+  \caption{The median hit-rate at varying coverage levels, compared to the hit-rate
+  given by the ``Naive Provider''.  To the left, for the North side of Chicago, and on
+  the right, the South side of Chicago.}
+  \label{fig:north_preds_normed}
+\end{figure*}
+
+We also ran the same analysis on the South side of Chicago, see the right-hand side plot
+in Figure~\ref{fig:north_preds_normed}.  The overall results are similar, with again
+the models from Section~\ref{sec:grid_interact} performing the best.
+
+Finally, let us compare our slightly disappointing findings with other papers.
+To our knowledge, there is no published work which uses openly available source code
+and openly available datasets; this was a significant motivation for the writing of the
+present paper.  \cite{sepp2} does not discuss results except in the most aggregated form,
+and only compares against ``hotspots'' produced by a human operator.  
+\cite[Figure~6]{sepp} displays hit-rates and standard errors, and show a significant
+improvement from the SEPP model compared to the classical prospective hotspot method.
+However, once bandwidths for the classical model are adjusted (see the second plot
+of \cite[Figure~6]{sepp}) this advantage becomes somewhat less, and almost non-existent
+at some coverage levels.  \cite[Figure~12]{rc} shows the SEPP method out-performing the
+STKDE method on some areas of Chicago (in particular, for the South Side).  The STKDE
+method is, to quote \cite{rc}, ``a variable bandwidth KDE with bandwidths computed in the
+same way as they are for the triggering function.''  That is, presumably a nearest neighbour
+KDE method.  A later paper by some of the same authors, \cite{arc}, also compares the SEPP
+method against the classical prospective hotspot method.  For the South Side of Chicago,
+\cite[Figure~5]{arc} finds results consistent with ours, namely that at smaller coverage
+levels, a simple (non-time dependent) KDE method (so rather similar to our ``naive''
+method) out-performs both the SEPP and prospective hotspot methods.
+
+
 
 
 
@@ -1713,9 +1864,29 @@ h^{-1} \sum_k \sum_{i<j} p^{(k)}_{i,j} w\Big( \frac{t - (t^{(k)}_j - t^{(k)}_i)}
 \]
 Here $h>0$ is a bandwidth, and $w$ is a kernel.  We shall take $w$ to be a Gaussian, and we
 shall either set $h$ manually, or use a variable bandwidth estimator, and so allow $h$ to
-vary, typically via a near-neighbour estimator (compare \cite[Appendix]{sepp}).
+vary, typically via a near-neighbour estimator (compare \cite[Appendix]{sepp}, and see
+the next section).
 Finally, as $f$ is only supported on the positive real line, we will reflect $f$ about $0$
 (see \cite[Section~2.10]{sil} for other possible options).
+
+
+\subsection{Nearest neighbour KDE method}\label{app:knn_details}
+
+Following \cite{sepp} we use a $k$-th nearest neighbour KDE method.  That is, and compare
+to the above, we now use
+\[ f(x) = \Big( \sum_i p_i \Big)^{-1}
+\sum_i h_i^{-1} p_i w\Big( \frac{x - x_i}{h_i} \Big), \]
+where $(p_i)$ are the \emph{weights}, $w$ is a kernel, for us always Gaussian, $x$
+is a vector, and $(x_i)$ are vectors.  Notice here we allow the bandwidths $(h_i)$ to
+vary.
+
+Following \cite{sepp} we first scale each coordinate of the input vectors $(x_i)$ so that
+each coordinate has unit sample variance.  Note that we do this for each coordinate
+individually, which differs from most ``plug-in'' KDE methods which use the full covariance
+matrix.  We then compute the distance from $x_i$ to its nearest $k$th neighbour to give
+us $h_i$.  If this happens to be $0$, then we set $h_i=1$.  We then scale back to the original
+sizes.
+
 
 
 
@@ -1838,6 +2009,8 @@ Maximising in $\mu$ and $\theta$ gives
 Again motivated by the arguments in Appendix~\ref{sec:his_est}, we estimate $f$ as a
 ``weighted KDE'' using the weights $(p_{j,j})$, and similarly estimate $g$ using the
 weights $(p_{i,j})_{i<j}$.
+
+
 
 
 
@@ -1992,6 +2165,9 @@ to expand this directly, but rather exploit linearity of the expectation.
 
 \begin{thebibliography}{99}
 
+\bibitem{arc} M. Adepeju, G. Rosser, T. Cheng,
+	``Novel evaluation metrics for sparse spatio-temporal point process hotspot predictions -- a crime case study'', International Journal of Geographical Information Science, 30:11, 2133-2154, DOI:10.1080/13658816.2016.1159684
+
 \bibitem{bn} W. Bernasco, P. Nieuwbeerta,
 	``How Do Residential Burglars Select Target Areas?: A New Approach to the Analysis of Criminal Location Choice'',
 	The British Journal of Criminology (2005) 45 296--315.
@@ -2112,6 +2288,10 @@ temporal events'', International Journal of Geographical Information Science, 14
 \bibitem{rc} G. Rosser, T. Cheng, ``Improving the Robustness and Accuracy of Crime
 	Prediction with the Self-Exciting Point Process Through Isotropic Triggering''
 	Appl. Spatial Analysis (2016) \texttt{https://doi.org/10.1007/s12061-016-9198-y}
+
+\bibitem{rdbjc} G. Rosser, T. Davies, K.\,J. Bowers, S.\,D. Johnson, T. Cheng,
+	``Predictive Crime Mapping: Arbitrary Grids or Street Networks?'',
+	Journal of Quantitative Criminology 2017 (33) 569--594.
 
 \bibitem{sil} B.\,W. Silverman,
 	``Density estimation for statistics and data analysis'',
