@@ -5,7 +5,7 @@
 *.pic.xz
 
 !Chicago_overview.png
-!simdata.png
+!simdata.pdf
 !events_by_hour.pdf
 !south_trigger.pdf
 !grid_kde_by_bandwidth.pdf
