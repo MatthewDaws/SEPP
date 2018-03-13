@@ -4,7 +4,8 @@
 \usepackage{amsmath,amsthm,amssymb,latexsym}
 %\usepackage[v2,tips,curve]{xy}
 \usepackage{graphicx}
-\usepackage{backref, showkeys}
+\usepackage{backref}
+%\usepackage{showkeys}
 
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
@@ -28,7 +29,24 @@
 \maketitle
 
 \begin{abstract}
-To do.
+We provide a detailed study of self-exciting point process models of crime.
+We study a range of models, starting with very simple grid based models where all
+interactions happen within grid cells, and work towards a fully spatial model where
+interactions are arbitrary, and KDE techniques are used to estimate background and
+trigger density functions in a data-driven manner.
+A detailed and mathematically rigourous derivation (in the appendix) of the fitting
+algorithms for each model is given.  We show explicitly how the general expectation
+maximisation (EM) algorithm leads in each case to a specific fitting algorithm for each model.
+By showing explicitly how the EM algorithm is used, we aim to make it easy for future
+researchers to derive fitting algorithms for new models.  We are also able to use the
+(slow) EM algorithm with complex models, instead of just relying upon the Stochastic
+EM algorithm: on real data, we have found huge differences in the results, which might
+explain problems previous studies have found with these complex models.  All of our
+models are implemented in an open source Python library, to allow for reproducibility
+of research, and to allow future researchers to quickly build upon our work.  We demonstrate
+each model by using burglary crime data from Chicago, and finish the paper by evaluating
+the models for the ability to predict future crime, in the short (one day) term.  We find
+the simple models perform just as well as more complex (and slow) models.
 \end{abstract}
 
 
@@ -73,9 +91,8 @@ EM algorithm can be applied to each specific model we develop.
 
 This work came about as part of our efforts to build an open source, Python based
 implementation of different crime prediction algorithms, which forms the \texttt{open\_cp}
-package.\footnote{Available at \texttt{https://github.com/QuantCrimAtLeeds/PredictCode}}
-The current paper is backed by Python code
-[\footnote{Eventually, link to public repo.}]
+package, \cite{opencp}.
+The current paper is backed by Python code, \cite{seppcode},
 which implements each model.  We use the framework provided by \texttt{open\_cp}, and base
 classes which abstract typical EM algorithm code.  It is our hope that this open source
 framework, together with our development of the theory, will make it easier for other
@@ -2193,6 +2210,9 @@ to expand this directly, but rather exploit linearity of the expectation.
 \bibitem{daws2} M. Daws, ``Comparison of short range spatial predictive policing forecasts'',
 	in preparation.
 
+\bibitem{seppcode} M. Daws, ``Self-excited point process models of crime'',
+    open source Python package, available at \texttt{https://github.com/MatthewDaws/SEPP/}
+
 %\bibitem{bda} A. Gelman, J.\,B. Carlin, H.\,S. Stern, D.\,B. Rubin,
 %	``Bayesian Data Analysis'',
 %	(CRC 2004).
@@ -2272,6 +2292,9 @@ gun crime prediction in Chicago'',
 
 \bibitem{predpol} Predpol website, ``UCLA Study on Predictive Policing'',
 	see \texttt{http://www.predpol.com/ucla-predictive-policing-study/}
+
+\bibitem{opencp} Quantitative Criminology at Leeds, ``\texttt{open\_cp}'',
+   open source Python library, available at \texttt{https://github.com/QuantCrimAtLeeds/PredictCode}
 
 \bibitem{ras} J.\,G. Rasmussen,
 	``Temporal point processes: the conditional intensity function'',
