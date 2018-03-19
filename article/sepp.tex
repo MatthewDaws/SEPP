@@ -45,7 +45,7 @@ explain problems previous studies have found with these complex models.  All of 
 models are implemented in an open source Python library, to allow for reproducibility
 of research, and to allow future researchers to quickly build upon our work.  We demonstrate
 each model by using burglary crime data from Chicago, and finish the paper by evaluating
-the models for the ability to predict future crime, in the short (one day) term.  We find
+the models for the ability to predict future crime, in the short (one day) term.  We find that
 the simple models perform just as well as more complex (and slow) models.
 \end{abstract}
 
@@ -119,13 +119,13 @@ and Martin Short for useful electronic correspondance.
 
 \section{Point process models}
 
-For general background on point processes, see the mathematical \cite{dvj}; the
-introductory lecture notes \cite{ras}; the gentle introduction in \cite[Chapter~8]{rip},
+For general background on point processes, see the mathematical \cite{dvj}, the
+introductory lecture notes \cite{ras}, the gentle introduction in \cite[Chapter~8]{rip},
 or the encyclopedic \cite{handbookss}.
 
 We shall view crime events as point events in time and space, say $N$ events which occur
 at times $t_1 < t_2 < \cdots < t_N$ and at locations $(x_i, y_i)_{i=1}^N$ which are all
-distinct.  The ``distinct'' condition is important is important because of the
+distinct.  The ``distinct'' condition is important because of the
 mathematical abstraction we use, but we could model exact repeats using \emph{marks};
 see also the discussion in Section~\ref{sec:exact_repeats} below.
 Alternatively, we can assign points to cells in a spatial grid
@@ -183,6 +183,7 @@ The classical prospective hot-spotting technique, \cite{bjp}, can be thought of 
 of this form, where $\mu=0$ identically, and $\mu_1$ is chosen ahead of time.  An
 advantage of the models considered in \cite{sepp, sepp2} is that they allow $\mu$ to be
 non-zero, and that they use \emph{past data} to inform the shape of $\mu$ and $\mu_1$.
+See also the discussion in Section~\ref{sec:fixed} below.
 
 The EM algorithm is an iterative algorithm which seeks to find Maximum Likelihood estimates
 of parameters (there are extensions to other applications) for models which admit ``hidden
@@ -208,7 +209,7 @@ simulation will eventually end.  (We note that we might also somehow ``simulate 
 as events before time $0$ might trigger events after time $0$.  Such considerations lead to
 the concept of a ``perfect simulation'', see \cite{mr}).
 
-Let $z_i$ be the event which ``triggered'' event $i$, with the convension that if $z_i=i$
+Let $z_i$ be the event which ``triggered'' event $i$, with the convention that if $z_i=i$
 then $i$ is a background event.  Thus $z_i \leq i$.  The $(z_i)$ form our unobserved data.
 The EM algorithm then works by using the current estimate of the parameters to assign a
 probability to the event $z_i=j$ for all $i$ and $j$.  The $E$ step computes the conditional
@@ -245,7 +246,7 @@ The log likelihood, given $(z_j)$, is
 &- \int_0^T \mu(t) \ dt - \sum_{j=1}^n \int_0^{T-t_j} \mu_1(t) \ dt,
 \end{align*}
 where $[\cdot]$ is the Iverson bracket, so for example $[z_j=j]$ is a random variable,
-equal to $1$ is $z_j$ is $j$, and $0$ otherwise.  The integrals are essentially
+equal to $1$ if $z_j$ is $j$, and $0$ otherwise.  The integrals are essentially
 normalisation factors.
 
 This sum may look formidable, but we can use two tricks.  Firstly, the $E$ step
@@ -312,8 +313,8 @@ Given that this data is artificially clustered, we also use ``redistributed'' da
 \cite{daws1}. The original points have been moved a small distance around the street network,
 and then assigned to the nearest building (see \cite{daws1} for a fuller discussion).
 Police data in the UK, especially for Burglary events, is often geocoded to buildings, and so
-we hope this second dataset will be more representative (at least certain sorts) of real-world
-data.
+we hope this second dataset will be more representative of (at least certain sorts of)
+real-world data.
 
 
 
@@ -369,8 +370,8 @@ similar results for all, with the exception of the ``Far Southwest'' which has $
 of about 10 hours, and the ``Southwest'', where the algorithm fails to converge.
 Running the algorithm on other year's worth of data shows similar behaviour.
 
-This failure of convergence is due to a problem which we will meet again below, so it
-is worth exploring now.  The log likelihood of the total data is
+The failure of convergence just mentioned is due to a problem which we will meet again below,
+so it is worth exploring now.  The log likelihood of the total data is
 \[ \sum_{k,i} \log\Big( \mu_k + \sum_{j<i} \theta\omega e^{-\omega(t^{(k)}_i - t^{(k)}_j)} \Big)
 - \sum_k T\mu_k - \sum_{k,i} \theta(1-e^{-\omega(T-t^{(k)}_i)}), \]
 (compare with Appendix~\ref{app:pp}).  Suppose that there exists $k$ and $j<i$ with
@@ -416,9 +417,9 @@ events (that is, essentially none!)
 
 \subsection{With a truncated exponential kernel}
 
-If exact repeats in times can cause the estimaton of $\omega$ to diverge to $\infty$,
+If exact repeats in times can cause the estimation of $\omega$ to diverge to $\infty$,
 then we might worry that different, but rather close, timestamps might cause $\omega$ to
-be estimated larger than is reasonable.  A small change we can make to the model to is
+be estimated larger than is reasonable.  A small change we can make to the model is
 replace the ``triggering'' kernel $\omega e^{-\omega t}$ with 
 \[ g(t) = \begin{cases} 0 &: t<t_0, \\ \omega e^{-\omega(t-t_0)} &: t\geq t_0.
 \end{cases} \]
@@ -463,7 +464,7 @@ are an unexpectedly large number of Burglary events timestamped to between 8am a
 Otherwise the number of events is fairly constant across the day, with a slight dip
 from 3am to 7am.  We do not know if, perhaps, people awake up and discover an overnight
 burglary; or if events are logged at this time but actually happen early, perhaps due
-to some sort of ``overnight working partern'' effect on behalf of the police (to give
+to some sort of ``overnight working pattern'' effect on behalf of the police (to give
 just two plausible reasons).  Notice that we see somewhat different patterns for the
 South and Southwest sides.
 
@@ -503,7 +504,7 @@ A first step in this direction is to consider a ``histogram estimator'', compare
 are slightly non-trivial, see Appendix~\ref{sec:his_est}.  The particular model we use
 is detailed in Appendix~\ref{app:grid_hist}.  We replace the exponential triggering kernel
 $\omega e^{-\omega t}$ by the ``histogram''
-\[ g(t) = \alpha_k \quad\text{if}\quad r\in\mathbb Z, rh \leq t < (r+1)h, \]
+\[ g(t) = \alpha_r \quad\text{if}\quad r\in\mathbb Z, rh \leq t < (r+1)h, \]
 where $h>0$ is the \emph{bandwidth} and $(\alpha_r)$ are positive values; we assume
 that $\alpha_r = 0$ for $r<0$.
 
@@ -511,7 +512,7 @@ We have fitted this model to the simulated data we used in Figure~\ref{fig:sim_g
 it works very well at a variety of different bandwidths, the histogram estimator well
 approximating the integral of the actual kernel over each interval.
 
-For our Chicago case study, we again use the South side.  Here we again find quite some
+For our Chicago case study, we again find quite some
 dependence on the bandwidth: with a small bandwidth the histogram is very noisy, but we
 do see repeating patterns, see Figure~\ref{fig:south_trigger}.
 At a large bandwidth, almost all the mass is estimated in the
@@ -533,11 +534,11 @@ near 7 and 9 days; and with $h=1$ we get a much more pronounced spike at around 
 
 \subsection{A kernel density estimator}\label{sec:grid_kde}
 
-Having introduced the histogram estimator, we now look at using a full blown kernel density
+Having introduced the histogram estimator, we now look at using a full-blown kernel density
 estimator, see Appendix~\ref{app:grid_kde}.  In our analysis of the EM algorithm, we have
 ignored ``edge correction issues'' as it seems computationally infeasible to do so.  However,
 we typically have a large interval of data (say, a year) to fit the model to, and from the above
-work, we expect that the trigger kernel will be shorted lived by comparison.
+work, we expect that the trigger kernel will be short-lived by comparison.
 
 We initialise the model in the same way as in Section~\ref{sec:gbm}, so initially the trigger
 kernel is exponential decay.  However, for all subsequent iterations of the EM algorithm,
@@ -560,7 +561,7 @@ a parametric form which captures it.  For completeness, we also follow the idea 
 and use a variable bandwidth, the local bandwidth chosen by the distance to the $k$th nearest
 neighbour, for various values of $k$.
 
-We again use the South side of Chicago here.  The results are interesting, in that for small
+For our Chicago case study, the results are interesting, in that for small
 bandwidths, we see temporally localised peaks in the trigger kernel, at 1, 2 and 4 days,
 and then further peaks at 7, 8 and 11, 12 and 13 days.  As the bandwidth increases, these
 are smoothed away until we get a curve which smoothly decays in time; see
@@ -641,8 +642,8 @@ we are fitting to, but with $\alpha=0$.  The EM algorithm again fits well to thi
 We estimate the parameters fairly precisely, and the background rate is estimated well,
 up to a similar error as we saw in Figure~\ref{fig:sim_grid}.
 
-We fit the model to Chicago North Side data, again for the year 2016.  With an initial
-experiment with $r_0=5m$ we estimate $\alpha\approx 8.19\times 10^{-3}, \sigma \approx 6.66$
+For real data, we perform an initial
+experiment with $r_0=5m$, and estimate $\alpha\approx 8.19\times 10^{-3}, \sigma \approx 6.66$
 and $\theta\approx 0.278$.  Thus there is certainly repeat-like behaviour, but it is very
 tightly grouped in space (almost all the probability of the trigger kernel is within
 20m of the triggering event, which seems unrealistically small).  The estimated value of
@@ -712,7 +713,7 @@ the same cliff-edge like behaviour at around 20m.
 
 For the second dataset, we see slightly different behaviour: $\omega^{-1}$ decays between
 $r_0=0$ and $r_0=15$m, with a spike around $7$m.  $\theta$ behaves in a rather similar way,
-and we do not see the increase and sudden cliff edge of Figure~\ref{fig:grid_vary_r01}.
+and we do not see the increase and sudden cliff-edge of Figure~\ref{fig:grid_vary_r01}.
 
 
 
@@ -754,7 +755,7 @@ for $g$).  In practise, this could be achieved by setting the relevant $p_{i,j}$
 and then applying the previous idea.
 \end{itemize}
 
-We implement an adaptive, data-driven approach which combines these ideas.  For each column
+We implement an adaptive, data-driven approach.  For each column
 of the $p$-matrix, we list the entries in decreasing order, and form the cumulative sum.  Any
 entry which is beyond a cutoff (we use 99.9\%) we set to 0.  This gives an automatic algorithm
 which leads to considerable speedup.  However, the resulting algorithm is still very slow
@@ -866,7 +867,7 @@ the space trigger is much more localised in space.
 Unfortunately, these results seem to (yet again) depend a great deal on the bandwidths chosen.
 Figure~\ref{fig:grid_kde_3} shows the same model as Figure~\ref{fig:grid_kde_1} but now $g$ uses
 a bandwidth of 50 metres.  The resulting estimate for $g$ is much smoother (of course), but also
-$\theta$ becomes $0.058$ while the $f$ now smoothly and quickly decays in the order of a week.
+$\theta$ becomes $0.058$, while $f$ now smoothly and quickly decays in the order of a week.
 With our second dataset, we get $\theta=0.036$ but rather similar kernel shapes.  By adjusting
 the bandwidths, we obtain a rather wide range of behaviours.
 
@@ -944,7 +945,7 @@ the sampled number of triggered points becomes too small.
 
 
 
-\subsection{Joint dependance in trigger}\label{sec:joint_grid}
+\subsection{Joint dependence in trigger}\label{sec:joint_grid}
 
 Instead of supposing that the trigger density factorises as $f(t)g(x,y)$ we can instead use a KDE
 to estimate the joint time/space density.  This approach is close in spirit to \cite{sepp}.
@@ -1032,7 +1033,7 @@ algorithm after 50 iterations.
 As ever, by changing the bandwidths, we obtain different results.  However, by contrast
 with previous sections, the results using the second dataset are rather similar. The main
 difference is in the analogue of Figure~\ref{fig:no_grid_kde_1a} where, again, the sample
-space trigger pattern is less clustered, and the right hand plots only extend to around 18 days
+space trigger pattern is less clustered, and the right-hand plots only extend to around 18 days
 instead of closer to 30 days.
 
 \begin{figure*}
@@ -1052,7 +1053,7 @@ Figure~\ref{fig:no_grid_kde_1}.}
 
 Following \cite{sepp2} more closely, we also used a nearest neighbour KDE method.
 Figure~\ref{fig:no_grid_nnkde_1} shows the result, which is notably different to
-Figure~\ref{fig:no_grid_kde_1}, especially in the lack of a strong pattern is the
+Figure~\ref{fig:no_grid_kde_1}, especially in the lack of a strong pattern in the
 marginal space trigger kernel.  Figure~\ref{fig:no_grid_nnkde_1a} shows the sampled
 trigger points, which again are much less extreme than that seen in
 Figure~\ref{fig:no_grid_kde_1a}.
@@ -1167,7 +1168,8 @@ We can compare this model to the classical ``prospective hotspotting'' technique
 we estimate the risk intensity at a point $(t,x,y)$ as
 \[ \sum_{t_i<t} g_1(\|(x,y) - (x_i,y_i)\|) g_2(t-t_i), \]
 where $g_1$ and $g_2$ are kernels on $[0,\infty)$.  (We could also, in principle, consider
-spatial kernels which had no radially symmetric).  \cite{rdbjc} uses a linear decay
+spatial kernels which had no radial symmetry, but we shall not do this here).
+\cite{rdbjc} uses a linear decay
 for $g_1$ and exponential decay for $g_2$, while the original \cite{bjp} uses an explicitly
 grid-based variant of this idea to compute $g_1$.
 
@@ -1188,8 +1190,8 @@ the first dataset.
 \begin{figure*}
   \includegraphics[width=\textwidth]{../notebooks/fixed_grid_1.pdf}
   \caption{Results of fitting the model from Section~\ref{sec:fixed} with a grid-based
-  background.  In each plot, the vertical axis shows $\theta$, the horizontal axis shows
-  $\omega^{-1}$ the expectation of the time decay.  We plot for varying values of $\sigma$.}
+  background.  In each plot, the vertical axis shows $\theta$ and the horizontal axis shows
+  $\omega^{-1}$, the expectation of the time decay.  We plot for varying values of $\sigma$.}
   \label{fig:fixed1}
 \end{figure*}
 
@@ -1231,7 +1233,7 @@ that the self-excited nature of the process means that we cannot simply look at 
 value of $\lambda^*(T)$: the history (values of $\lambda^*(T-t)$ for at least small $t>0$)
 will be important, as will the triggering process.
 
-We have performed this compute simulation for a number of different parameter combinations.
+We have performed this computer simulation for a number of different parameter combinations.
 Figure~\ref{fig:hawkes_sample} shows a window on a simulation with $\mu=2$ and $\omega=1,
 \theta=0.5$.
 
@@ -1248,13 +1250,13 @@ we simulated $1000$ days of events, and then for $T=100$ through $999$ performed
 technique for the next day, the time interval $[T,T+1)$.  We performed 100 such trials for
 each day, and take the mean as our prediction.  We also predicted the number of
 events simply by integrating the intensity function across this time interval.  For the
-parameters we have chosen, we loose very little accuracy by simply evaluating $\lambda^*$ at
+parameters we have chosen, we lose very little accuracy by simply evaluating $\lambda^*$ at
 $T+1/2$, instead of integrating it between $T$ and $T+1$.
 Figure~\ref{fig:hawkes_pred} shows the results of the difference between the predicted
 number of events, and the actual number of events.  In all cases, there is a large amount
 of error, with a longer tail on the negative side.  This means we often under-estimate, but
 more rarely over estimate, which seems intuitively plausible, as it is hard to predict a
-large but rare number of triggered events.  The simulation predicion method seems to
+large but rare number of triggered events.  The simulation prediction method seems to
 perform better, but not by a huge amount, as compared to simply using the mean value
 of $\lambda^*$.
 
@@ -1303,20 +1305,22 @@ is now $\hat p_k = n_k / \sum_k n_k$.
 We used the \texttt{open\_cp.scripted} Python module, which allows us to produce predictions,
 and to ``score'' them, in an automated way, using a simple Python script.  We adapted the
 major classes of models discussed in previous sections to give predictions, following the
-paradigm above.  To be precise, we fit the model using the EM algorithm, and then produce
+paradigm above.  Given the findings above, we have decided to integrate (approximately)
+$\lambda^*$ over time rather than run a simulation.
+To be precise, we fit the model using the EM algorithm, and then produce
 grid based predictions:
 \begin{itemize}
 \item for purely grid based models, we need to integrate over the time kernel for each
 grid cell.  We approximate this by sampling at 100, equally spaced, places over the time
 range which interests us (the next day, in this case);
-\item for more general models, we sample at 20 equally space place over time, and at 20 randomly
+\item for more general models, we sample at 20 equally spaced places over time, and at 20 randomly
 chosen places in space.  For speed, we only support trigger kernels which factor into a space
 component and a time component.
 \item finally, for the KDE based models, we further speed things up by converting the
 kernels into histograms, for the purposes of prediction.  We typically use a bandwidth of
 $1/10$ days and 10m, for time and space, respectively.  From numerical experiments on our data,
 replacing continuous kernels with histograms in this way leads to a huge increase in speed
-at very little in accuracy for the final prediction.
+at very little cost in accuracy for the final prediction.
 \end{itemize}
 
 We use the first dataset of Chicago data, for the year 2016.  We make a prediction for each
@@ -1329,7 +1333,7 @@ To ``score'' a prediction, we use the usual procedure
 (see \cite{arc} or \cite[Section~5]{sepp} for example)
  of fitting a ``coverage level'' (say, 10\%) and select that fraction
 of grid cells, using the prediction to rank the cells from most risky to least risky.
-We then compare the number of crime events on the next day with the number if events we
+We then compare the number of crime events on the next day with the number of events we
 have ``captured'': events which have fallen in the selected grid cells.  This is termed the
 ``hit-rate'' in the literature.  Following our suggestion in \cite{daws2}, we use a simple
 Bayesian approach, fitting a Binomial to the hit rates, with parameter $p$, the probability
@@ -1343,7 +1347,7 @@ being the proportion events before the current day which have occurred in that g
 We would certainly hope that a ``good'' prediction method, perhaps taking account of spatial
 interactions, and/or repeat behaviour, would out-perform this method.
 
-For those models which are parameters, we fit the models with a variety of parameters.  
+For those models which have fixed parameters, we fit the models with a variety of parameters.  
 We then pick the ``best'' parameter(s) to use by looking at the hit-rate over coverage levels
 up to 20\% (we use smaller coverage levels, as these seem more realistic, from the perspective
 of supposing that selected grid cells will somehow receive extra police attention, for example).
@@ -1382,7 +1386,7 @@ To our knowledge, there is no published work which uses openly available source 
 and openly available datasets; this was a significant motivation for the writing of the
 present paper.  \cite{sepp2} does not discuss results except in the most aggregated form,
 and only compares against ``hotspots'' produced by a human operator.  
-\cite[Figure~6]{sepp} displays hit-rates and standard errors, and show a significant
+\cite[Figure~6]{sepp} displays hit-rates and standard errors, and shows a significant
 improvement from the SEPP model compared to the classical prospective hotspot method.
 However, once bandwidths for the classical model are adjusted (see the second plot
 of \cite[Figure~6]{sepp}) this advantage becomes somewhat less, and almost non-existent
@@ -1426,10 +1430,10 @@ $t$ times an infinitesimal length of time.  Under reasonable conditions, the con
 intensity function exists, and when it exists, it uniquely characterises the point process.
 
 For example, if $\lambda^*(t) = \mu$ independent of time, we have a homogeneous Poisson
-process when intensity $\mu$ (the expected number of events in any unit interval of time is
+process with intensity $\mu$ (the expected number of events in any unit interval of time is
 $\mu$).  If $\lambda^*(t) = \mu(t)$ is a function of time, but independent of the past, 
-then we have an inhomogeneous Poisson process.  A more interesting example is the \emph{Hawkes}
-process where
+then we have an inhomogeneous Poisson process.  A more interesting example is the
+\emph{Hawkes process} where
 \[ \lambda^*(t) = \mu + \alpha \sum_{t_i < t} e^{-\beta(t-t_i)}. \]
 We think of this as a combination of a fixed ``background'' rate $\mu$ and then a 
 ``self-exciting'' component, one for each past event, of the form $\alpha e^{-\beta(t-t_i)}$.
@@ -1440,7 +1444,7 @@ events occurring in finite time, so long as $\alpha < \beta$).
 
 For treating point processes in many dimensions, we find it useful to work with ``marked
 processes'' which we think of as a point process evolving in time, where each event carries
-extra information: the ``mark'' (here almost exclusively 2D coordinates $(x,y)$).  
+extra information: the ``mark'' (here 2D coordinates $(x,y)$).  
 We shall only consider models with conditional intensity functions of the form
 \begin{equation}
 \lambda^*(t,x,y) = \mu(t,x,y) + \sum_{t_j<t} \mu_1(t_j,x_j,y_j;t-t_j,x-x_j,y-y_j).
@@ -1579,7 +1583,7 @@ Equivalently, we may set $p_{i,j}=0$ for $i<j$ when $t_i = t_j$.
 
 Let $\theta = \int \mu_1$ be the total intensity of the trigger.  The expected number of
 events that the trigger kernel will give rise to is thus $\theta$.
-Let $Z_0=1$ be the an event, which triggers $Z_1 \geq 0$ further events.  Each of
+Let $Z_0=1$ be the initial event, which triggers $Z_1 \geq 0$ further events.  Each of
 these events triggers further events, independently, say giving a total of $Z_2\geq 0$
 further events, and so forth.  We thus have a \emph{branching process}, \cite[Section~5.4]{gs},
 and so by using generating functions, we can prove that $\mathbb E(Z_n) = \mu^n$, and hence
@@ -1632,7 +1636,7 @@ We can similarly compute the integral
    \theta \omega e^{-\omega(t-t_i)} \ \rd t \Big)
 \end{align*}
 where region $k$ has area $A_k$.  Let us group the data by region, say
-region $k$ have events which occur at times $(t^{(k)}_i)_{i=1}^{n(k)}$.  Then the
+region $k$ has events which occur at times $(t^{(k)}_i)_{i=1}^{n(k)}$.  Then the
 above integral becomes
 \begin{align*} \sum_{k=1}^K TA_k\mu_k &+ \sum_{k=1}^K A_k \sum_{i=1}^{n(k)}
 \int_0^{T-t^{(k)}_i} \theta\omega e^{-\omega t} \ dt \\
@@ -1681,7 +1685,7 @@ this agrees exactly with the algorithm given in \cite[Section~2.2]{sepp2}.
 
 We explained in Section~\ref{sec:gbm} that exact repeats, cases when $t^{(k)}_i = t^{(k)}_j$
 for some $k$ and some $i < j$, are not only against the underlying probability model, but
-also cause problems for the EM algorithm, as maximum likelihood is assumed at $\omega=\infty$.
+also cause problems for the EM algorithm, as maximum likelihood is found at $\omega=\infty$.
 One possible way around this problem is to modify the triggering function from $g(t) = \omega
 e^{-\omega t}$ to
 \[ g(t) = \begin{cases} 0 &: t<t_0, \\ \omega e^{-\omega(t-t_0)} &: t\geq t_0.
@@ -1806,7 +1810,7 @@ this may be found easily using Newton-Raphson, for example.
 
 As $\gamma_r\geq 0$ we see that $\sum_r \beta_r / (\lambda+\theta h^{-1}\gamma_r) \leq \lambda^{-1}
 \sum_r \beta_r$ and so $\lambda \leq \sum_r \beta_r$.  Furthermore, $(\gamma_r)$ is a decreasing
-sequence.  Thus, compared with the non-edge corrected case (equation (\ref{eq:three})),
+sequence.  Thus, compared with the non-edge-corrected case (equation (\ref{eq:three})),
 we see that $\alpha_r$ will be smaller for small $r$, and larger for large $r$.
 
 This gives a rough guide as to how we might ``bias'' a general KDE method to take account of
@@ -1930,7 +1934,7 @@ for each $k$, and also
 If we ignore edge effects, this becomes $\theta = \frac{1}{n} \sum_{i<j} p_{i,j}$.
 
 As the trigger kernel now takes account of space, we need to work in real units.  That is,
-which it is find to assume $A_k=A$ for all $A$, we need to choose $A$ realistically, and
+while it is find to assume $A_k=A$ for all $A$, we need to choose $A$ realistically, and
 not just set it equal to $1$.
 
 
