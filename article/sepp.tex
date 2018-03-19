@@ -4,7 +4,7 @@
 \usepackage{amsmath,amsthm,amssymb,latexsym}
 %\usepackage[v2,tips,curve]{xy}
 \usepackage{graphicx}
-\usepackage{backref}
+%\usepackage{backref}
 %\usepackage{showkeys}
 
 \theoremstyle{plain}
@@ -1524,8 +1524,11 @@ In our case, given the above remarks, we find that
 where
 \[ p_{j,i} = \mathbb P(z_i=j\leq i) = \begin{cases} \mu(t_i,x_i,y_i) / \lambda^*(t_i,x_i,y_i) &: j=i, \\
 \mu_1(t_j,x_j,y_j; t_i-t_j,x_i-x_j,y_i-y_j) / \lambda^*(t_i,x_i,y_i) &: j<i \end{cases} \]
-Here $\lambda^*(t_i,x_i,y_i)$ is the normalisation factor ensuring that $\sum_{i=1}^n p_{i,j} = 1$ for
-each $j$.  The (general) E step is hence to compute
+Here $\lambda^*(t_i,x_i,y_i)$ is the normalisation factor ensuring that
+$\sum_{i=1}^n p_{i,j} = 1$ for each $j$.  For a careful justification of this,
+see Appendix~\ref{sec:p_matrix} below.
+
+The (general) E step is hence to compute
 \begin{equation}
 \Psi = \mathbb E_z(\log L) = 
 \sum_z \log L((t_i),(x_i),(y_i),(z_i))  \prod_i p_{z_i,i},
@@ -2035,119 +2038,17 @@ weights $(p_{i,j})_{i<j}$.
 
 
 
+\section{Derivation of the $p$-matrix}\label{sec:p_matrix}
 
+The abstract setting which the EM algorithm works in is the following.  We have a probability
+space $Y$ ($\subseteq\mathbb R^n$ say) and data $y\in Y$.  Typically we have a parametric
+model, so a parameter space $\Theta$ and given $\theta\in\Theta$ we have a density
+$f(y;\theta) : Y\rightarrow [0,\infty)$.
 
-\section{OLD.  Histograms in time and space}
-
-Let us start with the mathematically most complicated, but conceptually simplest,
-case, where the ``trigger'' kernel is estimated using histograms.  With reference
-to equations~(\ref{eq:main}) and (\ref{eq:factors}), we estimate $\mu_1$ by a
-histogram which depends only on the change in time,
-\[ \mu_1(t,x,y;t') = \theta \mu_1(t') = \theta \begin{cases}
-\alpha_k &: kh_t \leq t' < (k+1)h_t \text{ and } k < m_t, \\
-0 &: \text{otherwise},
-\end{cases} \]
-where $\theta$ is the overall intensity (so that the normalisation we require
-is $\sum_k \alpha_k=1$).  As we only consider the process in a finite time window
-$[0,T]$ it is appropriate to include ``edge-correction'', so we use the techniques
-of Section~\ref{app:his_est_edge} to find $\alpha_k$.
-
-We similarly set $g$ to be dependent only on change in space, and set
-\[ g(x',y';t,x,y,t') = g(x',y') = g(r') = 
-\begin{cases}
-\beta_k &: kh_s \leq r' < (k+1)h_s \text{ and } k < m_s, \\
-0 &: \text{otherwise}.
-\end{cases} \]
-Here we set $r' = \|(x',y')\| = \sqrt{(x')^2 + (y')^2}$;
-we need be careful of normalisation
-issues, as we want $\int_{\mathbb R^2} g = 1$, and
-\[ \int_{\mathbb R^2} g = \sum_{k=0}^{m_s-1} \beta_k \pi\big[
-(k+1)^2 - k^2 \big] h_s^2
-= \sum_{k=0}^{m_s-1} \beta_k \pi h_s^2 (2k+1). \]
-The E-step finds
-\[ \sum_{j=1}^n \sum_{i<j} p_{i,j} \log g(x_j-x_i, y_j-y_i)
-= \sum_{k=0}^{m_s-1} \beta'_k \log \beta_k, \]
-say, where $\beta'_k$ is the sum over all $p_{i,j}$ with $i<j$ and
-$kh_t \leq \|(x_j-x_i, y_j-y_i)\| < (k+1)h_t$.
-By the techniques of Section~\ref{sec:his_est}, this is maximised by setting
-\[ \beta_k = \frac{\beta'_k}{\pi h_s^2 (2k+1) \sum_i \beta'_i}. \]
-
-Similarly, the EM algorithm gives
-\[ \alpha_k = \frac{\beta''_k}{\lambda + \gamma_k}
-\quad\text{where $\lambda\in\mathbb R$ satisfies}\quad \sum_k \frac{\beta''_k}{\lambda + \gamma_k} = 1, \]
-where $\beta''_k$ is the sum over all $p_{i,j}$ with $i<j$ and
-$kh_s \leq t_j-t_i < (k+1)h_s$, and 
-\[ \gamma_k = \theta \sum_{i=1}^n \int_0^{T-t_i}
-\chi_{[kh_t,(k+1)h_t)}(x) \ dx. \]
-
-Finally, to update $\theta$, the E-step finds
-\[ \sum_{i<j} p_{i,j} \log\theta - \theta\sum_{k=0}^{m_t-1} \gamma_k \alpha_k. \]
-This is maximised by setting
-\[ \theta = \frac{\sum_{i<j} p_{i,j}}{\sum_{k=0}^{m_t-1} \gamma_k \alpha_k}. \]
-
-
-\subsection{The background intensity}
-
-Finally, we are left with the task of estimating the background intensity,
-$\mu(t) f(x,y|t)$.  We shall suppose that the overall rate is constant $\mu(t)=\mu$,
-so the E-step finds $\log(\mu) \sum_{i=1}^n p_{i,i} - \mu T$,
-which is maximised by
-\[ \mu = \frac{1}{T} \sum_{i=1}^n p_{i,i}. \]
-
-We will assume that $f$ is independent of time, and will typically estimate $f$
-using a kernel density estimation method, ``weighting'' as in the discussion
-at the end of Section~\ref{sec:his_est}.
-
-
-
-
-\section{Further examples; to do}
-
-\subsection{Non-parametric example}
-
-[\footnote{See chapter~6 of the EM book}]
-When computing the conditional expectation is hard, an alternative strategy is to draw a sample
-of $z$ from the condition distribution, and then to optimise with this sample.  That is, for
-each $i$ we deem event $i$ to be ``background'' with probability $p_{i,i}$ and to have been
-``triggered'' by event $j<i$ with probability $p_{i,j}$.  This leads to the ``stocastic declusting''
-algorithm considered in [\footnote{references}].  The advantage of, in the E step, making
-a definitive choice for the ``braching structure'' of the process is that having arrived at,
-say, certain points as being background events, a non-parametric approach (e.g. kernel density
-estimation) may be applied to these points.  Another advantage [\footnote{As noted by Mohler et al.}]
-is that the number of data points remains constant, profitably allowing for the use of KDE methods.
-(TODO: Rewrite this so it makes sense.)
-
-An alternative, though still ``ad hoc'', approach is to incorporate the probabilities $(p_{i,j})$
-into the kernel density estimation as ``weights'' on the kernel.  [\footnote{Expand this once we've
-done some research.}]
-
-
-\subsection{Quasi-parametric model}
-
-TODO:
-\[ \mu(t,x,y) = \mu f(x,y), \quad
-\mu_1(t,x,y; t',x',y') = \theta(x,y) \omega(x,y) e^{-\omega(x,y) t'} \text{Gaussian term} \]
-
-
-
-
-
-[\footnote{Another Reference to the ``2nd'' Mohler et al paper}]
-
-
-
-
-\section{Meta-Appendix}
-
-Not for inclusion in the final document, but an aide de memoire to myself.
-
-The abstract setting which the EM algorithm works in is the following.  We have a probability space
-$Y$ ($\subseteq\mathbb R^n$ say) and data $y\in Y$.  Typically have a parametric model, so a parameter
-space $\Theta$ and given $\theta\in\Theta$ we have a density $f(y;\theta) : Y\rightarrow [0,\infty)$.
-
-We also have hidden data, a probability space $Z$ and $z\in Z$.  The full data is the pair $x = (y,z)$.
-We assume that given $\theta$ we know the full probability density $g(y,z;\theta)$.  The relation between
-$f$ and $g$ is that $f(y;\theta) = \int_Z g(y,z;\theta) \ dz$.
+We also have hidden data, a probability space $Z$ and $z\in Z$.  The full data is the pair
+$x = (y,z)$.  We assume that given $\theta$ we know the full probability density
+$g(y,z;\theta)$.  The relation between $f$ and $g$ is that
+$f(y;\theta) = \int_Z g(y,z;\theta) \ dz$.
 
 We have observed data $y$ and so form the conditional distribution of $z$, which is
 \[ h: Z\rightarrow [0,\infty); \quad h(z;\theta) = \frac{g(y,z;\theta)}{\int_Z g(y,z';\theta) \ dz'}. \]
@@ -2164,7 +2065,7 @@ $\Psi$, so
 \subsection{For the branching structure of a point process}
 
 We take $Z = \{ (z_j)_{j=1}^n : z_j \in \{1,2,\cdots,j\} \}$ a finite set, so we may replace integrals
-by sums.  From equation (\ref{eq:one}) we have expression of the form
+by sums.  From equation (\ref{eq:one}) we have an expression of the form
 \[ f(t=(t_i); \theta) = \sum_{z\in Z} \prod_j a(t,z_j,j;\theta) C(t;\theta) \]
 where $\theta$ encodes the details of the background $\mu$ and trigger $\mu_1$.  Here $a(t,z_j,j;\theta)
 \in [0,\infty)$ is a number, and $C(t;\theta)$ is a normalising constant which is independent of $z$.
@@ -2209,10 +2110,10 @@ to expand this directly, but rather exploit linearity of the expectation.
 	(Springer, 2003).
 
 \bibitem{daws1} M. Daws, ``Open crime data-sets: Pitfalls of geocoding'',
-	in preparation.
+	preprint.
 
 \bibitem{daws2} M. Daws, ``Comparison of short range spatial predictive policing forecasts'',
-	in preparation.
+	preprint.
 
 \bibitem{seppcode} M. Daws, ``Self-excited point process models of crime'',
     open source Python package, available at \texttt{https://github.com/MatthewDaws/SEPP/}
