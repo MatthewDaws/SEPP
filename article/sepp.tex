@@ -1363,7 +1363,7 @@ Figure~\ref{fig:north_preds} shows the result.  We notice that all the methods p
 similarly, with the expected variation between different days for any given model certainly
 being comparable to the difference between different models.  To compare better the different
 models, we compare the hit-rate against that given by the ``Naive Provider'', as shown in
-Figure~\ref{fig:north_preds_normed}.  For the North side of Chicago, the model with the best
+Figure~\ref{fig:preds_normed}.  For the North side of Chicago, the model with the best
 average increase over the Naive Provider is the \texttt{GridSpaceExpDecayProvider}
 which is the first model considered in Section~\ref{sec:grid_interact}.  The other models in
 Section~\ref{sec:grid_interact} also perform well.
@@ -1374,12 +1374,45 @@ Section~\ref{sec:grid_interact} also perform well.
   \caption{The median hit-rate at varying coverage levels, compared to the hit-rate
   given by the ``Naive Provider''.  To the left, for the North side of Chicago, and on
   the right, the South side of Chicago.}
-  \label{fig:north_preds_normed}
+  \label{fig:preds_normed}
 \end{figure*}
 
 We also ran the same analysis on the South side of Chicago, see the right-hand side plot
-in Figure~\ref{fig:north_preds_normed}.  The overall results are similar, with again
-the models from Section~\ref{sec:grid_interact} performing the best.
+in Figure~\ref{fig:preds_normed}.  The overall results are similar, with again
+the models from Section~\ref{sec:grid_interact} performing well.  Here, we actually
+found that a grid-based fixed trigger kernel method (see Section~\ref{sec:fixed})
+performed overall the strongest.  However, the ``best'' parameters turned out to
+have $\sigma=20m$ and $\omega^{-1} = 20$ days.  While this time decay seems reasonable,
+given previous research, the space depedence is tiny.
+
+\begin{figure*}
+  \includegraphics[width=3.3in]{../notebooks/all_mod_north_preds_normed.pdf}
+  \includegraphics[width=3.3in]{../notebooks/all_mod_south_preds_normed.pdf}
+  \caption{As Figure~\ref{fig:preds_normed} but for the second dataset.}
+  \label{fig:mod_preds_normed}
+\end{figure*}
+
+We also ran the same experiment on the second dataset, see
+Figure~\ref{fig:mod_preds_normed}.  The results are somewhat surprising, and differ
+markedly between the North and South sides of Chicago.  For the North side, by far the best
+performer is the KDE based fixed trigger model from Section~\ref{sec:fixed}, followed
+by the KDE model from Section~\ref{sec:no_grid_kde}.  The optimal settings for the
+fixed trigger model are $\omega^{-1} = 100$ days (which is on the long side) and
+$\sigma=100m$ which is fairly reasonable.  Comparing betwee the two datasets, the KDE
+fixed trigger model performs about the same, in terms of absolute hit-rate, while the
+grid based fixed trigger model, and the ``naive'' predictor, both perform somewhat worse.
+Thus the radical change in the plot shown in Figure~\ref{fig:mod_preds_normed} is mostly
+caused by this decrease in the quality of the ``naive'' predictor.  An alternative
+interpretation is that for the more ``realistic'' dataset, the KDE method(s) show their
+flexibility.  For the South side, the story is similar, but the decrease in quality
+of the ``naive'' prediction is less marked, which explains why the plot in
+Figure~\ref{fig:mod_preds_normed} is less radically different than before.  Again, the
+KDE based methods now perform the best (which is to say, compared with the first
+dataset, show the least decrease is hit-rate).
+
+These results again stress the importance of thinking about the input data, and its
+particular characteristics, instead of just focusing on the prediction algorithm.
+We explore this idea more fully in \cite{daws1}.
 
 Finally, let us compare our slightly disappointing findings with other papers.
 To our knowledge, there is no published work which uses openly available source code
