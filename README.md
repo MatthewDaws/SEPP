@@ -12,7 +12,7 @@ Self-excited point process models of crime:
 
 ### Article
 
-See the [article directory](tree/master/article/) for the LaTeX source-code, or [download a PDF file here](blob/master/article.pdf).
+See the [article directory](article/) for the LaTeX source-code, or [download a PDF file here](article.pdf).
 
 ## Install
 
